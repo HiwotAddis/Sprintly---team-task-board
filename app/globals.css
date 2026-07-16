@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  /* Smooth scrolling improves the mobile landing-page feel without extra JS. */
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-sand text-ink antialiased;
+  background-image: radial-gradient(circle at top, rgba(242, 159, 5, 0.16), transparent 28%),
+    linear-gradient(180deg, #fffdf8 0%, #f7f2e8 100%);
+}
+
+/* Keep links and controls visually consistent across the site. */
+a {
+  @apply transition-colors duration-200;
+}
