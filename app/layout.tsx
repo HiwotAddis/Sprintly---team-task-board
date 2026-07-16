@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Footer } from '@/components/footer';
-import { Header } from '@/components/header';
+import type { Metadata } from "next";
+import "./globals.css";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
-  title: 'TorqueWorks Auto Repair',
-  description: 'A modern demo site for a mechanic and auto repair business.',
+  title: "TorqueWorks Auto Repair",
+  description: "A modern demo site for a mechanic and auto repair business.",
 };
 
 export default function RootLayout({
