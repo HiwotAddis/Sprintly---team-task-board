@@ -1,5 +1,5 @@
+/** @type {import('postcss-load-config').Config} */
 const config = {
-  // Tailwind provides the utility classes; Autoprefixer keeps output browser-safe.
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
