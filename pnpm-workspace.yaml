@@ -1,3 +1,7 @@
 packages:
   - "server"
   - "client"
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
