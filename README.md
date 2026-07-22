@@ -10,7 +10,7 @@
 
 ```bash
 pnpm install
-docker compose up -d
+docker compose up -d         <!-- docker compose down-->
 cp server/.env.example server/.env
 cp client/.env.example client/.env.local
 pnpm dev
