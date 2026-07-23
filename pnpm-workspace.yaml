@@ -1,7 +1,17 @@
 packages:
   - "server"
   - "client"
+
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - "bcrypt"
+  - "prisma"
 allowBuilds:
+  '@prisma/client': set this to true or false
+  '@prisma/engines': set this to true or false
+  bcrypt: set this to true or false
   esbuild: true
+  prisma: set this to true or false
   sharp: true
   unrs-resolver: true
