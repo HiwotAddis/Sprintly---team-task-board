@@ -10,8 +10,9 @@
 
 ```bash
 pnpm install
-docker compose up -d         <!-- docker compose down-->
+docker compose up -d
 cp server/.env.example server/.env
 cp client/.env.example client/.env.local
+pnpm --filter server exec prisma migrate deploy
 pnpm dev
 ```
