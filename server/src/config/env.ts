@@ -1,13 +1,4 @@
-import { config as loadEnv } from "dotenv";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { z } from "zod";
-
-const serverRoot = resolve(
-  fileURLToPath(new URL(".", import.meta.url)),
-  "../..",
-);
-loadEnv({ path: resolve(serverRoot, ".env") });
 
 const durationRegex = /^\d+[smhd]$/;
 
