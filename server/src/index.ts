@@ -1,17 +1,31 @@
-import "dotenv/config";
-import cors from "cors";
-import express from "express";
+import { createApp } from "./app.js";
+import { env } from "./config/env.js";
+import { logger } from "./lib/logger.js";
+import { prisma } from "./lib/prisma.js";
+import { connectRedis, disconnectRedis } from "./lib/redis.js";
 
-const app = express();
-const port = Number(process.env.PORT) || 4000;
+async function main() {
+  await connectRedis();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN }));
-app.use(express.json());
+  const app = createApp();
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
+  const server = app.listen(env.PORT, () => {
+    logger.info({ port: env.PORT }, "Server listening");
+  });
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  const shutdown = async (signal: string) => {
+    logger.info({ signal }, "Shutting down");
+    server.close();
+    await disconnectRedis();
+    await prisma.$disconnect();
+    process.exit(0);
+  };
+
+  process.on("SIGINT", () => void shutdown("SIGINT"));
+  process.on("SIGTERM", () => void shutdown("SIGTERM"));
+}
+
+main().catch((error) => {
+  logger.fatal({ err: error }, "Failed to start server");
+  process.exit(1);
 });
