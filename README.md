@@ -1,4 +1,4 @@
-# TorqueWorks
+# Sprintly - team-task-board
 
 ## Stack
 
