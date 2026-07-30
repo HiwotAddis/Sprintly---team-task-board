@@ -1,4 +1,8 @@
+import { config } from "dotenv";
+import { resolve } from "node:path";
 import { z } from "zod";
+
+config({ path: resolve(process.cwd(), ".env") });
 
 const durationRegex = /^\d+[smhd]$/;
 

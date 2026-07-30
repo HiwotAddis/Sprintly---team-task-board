@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import cors from "cors";
 import express from "express";
-import pinoHttp from "pino-http";
+import { pinoHttp } from "pino-http";
 import { env } from "./config/env.js";
 import { logger } from "./lib/logger.js";
 import { errorHandler } from "./middleware/error-handler.js";
@@ -14,7 +14,7 @@ export function createApp(): Express {
     pinoHttp({
       logger,
       autoLogging: {
-        ignore: (req) => req.url === "/health",
+        ignore: (req: { url?: string }) => req.url === "/health",
       },
     }),
   );
