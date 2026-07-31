@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TorqueWorks",
+  title: "Sprintly",
   description: "Real-time team task board",
 };
 
