@@ -17,9 +17,9 @@ pnpm --filter server exec prisma migrate deploy
 pnpm dev
 ```
 
-
-```md
 ## Testing
+```md
+
 
 Run API tests:
 
