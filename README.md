@@ -16,3 +16,12 @@ cp client/.env.example client/.env.local
 pnpm --filter server exec prisma migrate deploy
 pnpm dev
 ```
+
+
+```md
+## Testing
+
+Run API tests:
+
+```bash
+pnpm --filter server exec node scripts/test-api.mjs
