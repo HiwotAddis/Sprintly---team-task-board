@@ -25,3 +25,4 @@ Run API tests:
 
 ```bash
 pnpm --filter server exec node scripts/test-api.mjs
+```
