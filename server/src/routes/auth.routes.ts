@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { authenticate } from "../middleware/authenticate.js";
+import { verifyJWT } from "../middleware/verify-jwt.js";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { validateBody } from "../middleware/validate.js";
 import {
@@ -50,7 +50,7 @@ authRouter.post(
 
 authRouter.post(
   "/logout-all",
-  authenticate,
+  verifyJWT,
   asyncHandler(async (req, res) => {
     const result = await authService.logoutAllDevices(req.user!.sub);
     res.status(200).json(result);

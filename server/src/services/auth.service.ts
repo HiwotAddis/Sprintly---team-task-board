@@ -5,6 +5,7 @@ import {
   AppError,
   INVALID_CREDENTIALS_MESSAGE,
 } from "../utils/errors.js";
+import { ErrorCodes } from "../utils/error-codes.js";
 import type { LoginInput, SignupInput } from "../schemas/auth.schema.js";
 import {
   createAccessToken,
@@ -49,7 +50,7 @@ export async function signup(input: SignupInput): Promise<AuthUserResponse> {
   });
 
   if (existingUser) {
-    throw new AppError(409, "Email is already registered");
+    throw new AppError(409, "Email is already registered", ErrorCodes.EMAIL_REGISTERED);
   }
 
   const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
@@ -79,13 +80,13 @@ export async function login(input: LoginInput): Promise<AuthUserResponse> {
   });
 
   if (!user) {
-    throw new AppError(401, INVALID_CREDENTIALS_MESSAGE);
+    throw new AppError(401, INVALID_CREDENTIALS_MESSAGE, ErrorCodes.INVALID_CREDENTIALS);
   }
 
   const passwordMatches = await bcrypt.compare(input.password, user.password);
 
   if (!passwordMatches) {
-    throw new AppError(401, INVALID_CREDENTIALS_MESSAGE);
+    throw new AppError(401, INVALID_CREDENTIALS_MESSAGE, ErrorCodes.INVALID_CREDENTIALS);
   }
 
   logger.info({ userId: user.id }, "User logged in");
@@ -107,7 +108,7 @@ export async function refresh(refreshToken: string): Promise<AuthTokens> {
   });
 
   if (!user) {
-    throw new AppError(401, "Invalid refresh token");
+    throw new AppError(401, "Invalid refresh token", ErrorCodes.INVALID_TOKEN);
   }
 
   const accessToken = createAccessToken(user.id, user.email);

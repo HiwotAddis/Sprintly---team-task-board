@@ -6,6 +6,7 @@ import { env } from "./config/env.js";
 import { logger } from "./lib/logger.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { authRouter } from "./routes/auth.routes.js";
+import { tasksRouter, workspacesRouter } from "./routes/workspaces.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -27,6 +28,8 @@ export function createApp(): Express {
   });
 
   app.use("/auth", authRouter);
+  app.use("/workspaces", workspacesRouter);
+  app.use("/tasks", tasksRouter);
 
   app.use(errorHandler);
 

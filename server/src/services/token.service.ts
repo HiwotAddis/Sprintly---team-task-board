@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { durationToSeconds, env } from "../config/env.js";
 import { redis } from "../lib/redis.js";
 import { AppError } from "../utils/errors.js";
+import { ErrorCodes } from "../utils/error-codes.js";
 
 const REFRESH_KEY_PREFIX = "refresh";
 
@@ -46,7 +47,7 @@ function decodeRefreshToken(token: string): RefreshTokenClaims & { secret: strin
 
     return { userId, tokenId, secret };
   } catch {
-    throw new AppError(401, "Invalid refresh token");
+    throw new AppError(401, "Invalid refresh token", ErrorCodes.INVALID_TOKEN);
   }
 }
 
@@ -93,7 +94,7 @@ export async function verifyRefreshToken(
   const storedHash = await redis.get(refreshKey(userId, tokenId));
 
   if (!storedHash || storedHash !== hashSecret(secret)) {
-    throw new AppError(401, "Invalid refresh token");
+    throw new AppError(401, "Invalid refresh token", ErrorCodes.INVALID_TOKEN);
   }
 
   return { userId, tokenId };
