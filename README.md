@@ -18,8 +18,6 @@ pnpm dev
 ```
 
 ## Testing
-```md
-
 
 Run API tests:
 
