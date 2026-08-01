@@ -129,7 +129,7 @@ workspaceMemberRouter.get(
    * endpoints still leak workspace structure).
    */
   asyncHandler(async (req, res) => {
-    const board = await boardService.getBoard(
+    const board = await boardService.getBoardDetail(
       requireRouteParams(req, "workspaceId").workspaceId,
       requireRouteParams(req, "workspaceId", "boardId").boardId,
     );

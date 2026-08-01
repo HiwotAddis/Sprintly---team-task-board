@@ -10,6 +10,9 @@ export function errorHandler(
   _next: NextFunction,
 ): void {
   if (error instanceof AppError) {
+    if (error.retryAfterSeconds !== undefined) {
+      res.setHeader("Retry-After", String(error.retryAfterSeconds));
+    }
     res.status(error.statusCode).json({ error: error.message, code: error.code });
     return;
   }

@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { rateLimitLogin } from "../middleware/rate-limit-login.js";
 import { verifyJWT } from "../middleware/verify-jwt.js";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { validateBody } from "../middleware/validate.js";
@@ -23,6 +24,7 @@ authRouter.post(
 
 authRouter.post(
   "/login",
+  rateLimitLogin,
   validateBody(loginSchema),
   asyncHandler(async (req, res) => {
     const result = await authService.login(req.body);

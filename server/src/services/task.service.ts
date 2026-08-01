@@ -1,3 +1,4 @@
+import { invalidateBoardDetailCache } from "../lib/board-cache.js";
 import { prisma } from "../lib/prisma.js";
 import { ErrorCodes } from "../utils/error-codes.js";
 import { AppError, notFound } from "../utils/errors.js";
@@ -61,7 +62,7 @@ export async function createTask(
   const position = input.position ?? (await nextTaskPosition(columnId));
 
   try {
-    return await prisma.task.create({
+    const task = await prisma.task.create({
       data: {
         title: input.title,
         description: input.description ?? null,
@@ -73,6 +74,8 @@ export async function createTask(
       },
       select: taskSelect,
     });
+    await invalidateBoardDetailCache(boardId);
+    return task;
   } catch {
     throw new AppError(
       409,
@@ -114,7 +117,7 @@ export async function updateTask(
   }
 
   try {
-    return await prisma.task.update({
+    const task = await prisma.task.update({
       where: { id: taskId },
       data: {
         ...(input.title !== undefined ? { title: input.title } : {}),
@@ -131,6 +134,8 @@ export async function updateTask(
       },
       select: taskSelect,
     });
+    await invalidateBoardDetailCache(boardId);
+    return task;
   } catch {
     throw new AppError(
       409,
@@ -165,6 +170,7 @@ export async function deleteTask(
 
   try {
     await prisma.task.delete({ where: { id: taskId } });
+    await invalidateBoardDetailCache(boardId);
   } catch {
     throw notFound("Task");
   }

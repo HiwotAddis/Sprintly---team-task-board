@@ -1,3 +1,4 @@
+import { invalidateBoardDetailCache } from "../lib/board-cache.js";
 import { prisma } from "../lib/prisma.js";
 import { ErrorCodes } from "../utils/error-codes.js";
 import { AppError, notFound } from "../utils/errors.js";
@@ -36,13 +37,15 @@ export async function createColumn(
     input.position ?? (await nextColumnPosition(boardId));
 
   try {
-    return await prisma.column.create({
+    const column = await prisma.column.create({
       data: {
         name: input.name,
         boardId,
         position,
       },
     });
+    await invalidateBoardDetailCache(boardId);
+    return column;
   } catch {
     throw new AppError(
       409,
@@ -73,13 +76,15 @@ export async function updateColumn(
   }
 
   try {
-    return await prisma.column.update({
+    const column = await prisma.column.update({
       where: { id: columnId },
       data: {
         ...(input.name !== undefined ? { name: input.name } : {}),
         ...(input.position !== undefined ? { position: input.position } : {}),
       },
     });
+    await invalidateBoardDetailCache(boardId);
+    return column;
   } catch {
     throw new AppError(
       409,
@@ -98,6 +103,7 @@ export async function deleteColumn(
 
   try {
     await prisma.column.delete({ where: { id: columnId } });
+    await invalidateBoardDetailCache(boardId);
   } catch {
     throw notFound("Column");
   }
