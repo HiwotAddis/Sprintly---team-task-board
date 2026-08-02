@@ -3,6 +3,7 @@ import { env } from "./config/env.js";
 import { logger } from "./lib/logger.js";
 import { prisma } from "./lib/prisma.js";
 import { connectRedis, disconnectRedis } from "./lib/redis.js";
+import { initSocketServer } from "./lib/socket.js";
 
 async function main() {
   await connectRedis();
@@ -12,6 +13,8 @@ async function main() {
   const server = app.listen(env.PORT, () => {
     logger.info({ port: env.PORT }, "Server listening");
   });
+
+  initSocketServer(server);
 
   const shutdown = async (signal: string) => {
     logger.info({ signal }, "Shutting down");

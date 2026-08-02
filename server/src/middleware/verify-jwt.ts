@@ -1,13 +1,13 @@
 import type { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { env } from "../config/env.js";
 import { ErrorCodes } from "../utils/error-codes.js";
 import { AppError } from "../utils/errors.js";
+import {
+  extractBearerToken,
+  verifyAccessToken,
+  type AccessTokenPayload,
+} from "../utils/access-token.js";
 
-export interface AccessTokenPayload {
-  sub: string;
-  email: string;
-}
+export type { AccessTokenPayload };
 
 declare global {
   namespace Express {
@@ -25,33 +25,17 @@ export function verifyJWT(
   _res: Response,
   next: NextFunction,
 ): void {
-  const header = req.headers.authorization;
+  const token = extractBearerToken(req.headers.authorization);
 
-  if (!header?.startsWith("Bearer ")) {
+  if (!token) {
     next(new AppError(401, "Authentication required", ErrorCodes.AUTH_REQUIRED));
     return;
   }
 
-  const token = header.slice("Bearer ".length);
-
   try {
-    const payload = jwt.verify(token, env.JWT_SECRET);
-
-    if (typeof payload === "string" || !payload.sub) {
-      next(
-        new AppError(401, "Invalid or expired access token", ErrorCodes.INVALID_TOKEN),
-      );
-      return;
-    }
-
-    req.user = {
-      sub: payload.sub,
-      email: typeof payload.email === "string" ? payload.email : "",
-    };
+    req.user = verifyAccessToken(token);
     next();
-  } catch {
-    next(
-      new AppError(401, "Invalid or expired access token", ErrorCodes.INVALID_TOKEN),
-    );
+  } catch (error) {
+    next(error);
   }
 }

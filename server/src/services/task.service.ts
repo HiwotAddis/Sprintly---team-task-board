@@ -4,6 +4,11 @@ import { ErrorCodes } from "../utils/error-codes.js";
 import { AppError, notFound } from "../utils/errors.js";
 import type { CreateTaskInput, UpdateTaskInput } from "../schemas/workspace.schema.js";
 import {
+  emitTaskCreated,
+  emitTaskDeleted,
+  emitTaskUpdated,
+} from "./task-realtime.service.js";
+import {
   assertAssigneeInWorkspace,
   getColumnInWorkspace,
   getTaskByIdInWorkspace,
@@ -75,6 +80,7 @@ export async function createTask(
       select: taskSelect,
     });
     await invalidateBoardDetailCache(boardId);
+    emitTaskCreated(boardId, task);
     return task;
   } catch {
     throw new AppError(
@@ -135,6 +141,7 @@ export async function updateTask(
       select: taskSelect,
     });
     await invalidateBoardDetailCache(boardId);
+    emitTaskUpdated(boardId, task);
     return task;
   } catch {
     throw new AppError(
@@ -171,6 +178,7 @@ export async function deleteTask(
   try {
     await prisma.task.delete({ where: { id: taskId } });
     await invalidateBoardDetailCache(boardId);
+    emitTaskDeleted(boardId, { taskId, columnId });
   } catch {
     throw notFound("Task");
   }
