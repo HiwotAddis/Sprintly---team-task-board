@@ -5,12 +5,14 @@ import { requireWorkspaceMemberViaTask } from "../middleware/require-workspace-m
 import { validateBody, validateParams } from "../middleware/validate.js";
 import { verifyJWT } from "../middleware/verify-jwt.js";
 import {
+  addMemberSchema,
   boardIdParamSchema,
   columnIdParamSchema,
   createBoardSchema,
   createColumnSchema,
   createTaskSchema,
   createWorkspaceSchema,
+  removeMemberParamSchema,
   taskIdOnlyParamSchema,
   taskIdParamSchema,
   updateBoardSchema,
@@ -91,6 +93,46 @@ workspaceMemberRouter.delete(
     await workspaceService.deleteWorkspace(
       requireRouteParams(req, "workspaceId").workspaceId,
       req.user!.sub,
+    );
+    res.status(204).send();
+  }),
+);
+
+/* ------------------------------------------------------------------ */
+/*  Workspace members                                                 */
+/* ------------------------------------------------------------------ */
+
+workspaceMemberRouter.get(
+  "/members",
+  asyncHandler(async (req, res) => {
+    const members = await workspaceService.listMembers(
+      requireRouteParams(req, "workspaceId").workspaceId,
+    );
+    res.json({ members });
+  }),
+);
+
+workspaceMemberRouter.post(
+  "/members",
+  validateBody(addMemberSchema),
+  asyncHandler(async (req, res) => {
+    const member = await workspaceService.addMember(
+      requireRouteParams(req, "workspaceId").workspaceId,
+      req.user!.sub,
+      req.body,
+    );
+    res.status(201).json({ member });
+  }),
+);
+
+workspaceMemberRouter.delete(
+  "/members/:memberId",
+  validateParams(removeMemberParamSchema),
+  asyncHandler(async (req, res) => {
+    await workspaceService.removeMember(
+      requireRouteParams(req, "workspaceId").workspaceId,
+      req.user!.sub,
+      requireRouteParams(req, "memberId").memberId,
     );
     res.status(204).send();
   }),

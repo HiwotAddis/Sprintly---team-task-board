@@ -1,6 +1,9 @@
 import { prisma } from "../lib/prisma.js";
 import { forbidden, notFound } from "../utils/errors.js";
+import { AppError } from "../utils/errors.js";
+import { ErrorCodes } from "../utils/error-codes.js";
 import type {
+  AddMemberInput,
   CreateWorkspaceInput,
   UpdateWorkspaceInput,
 } from "../schemas/workspace.schema.js";
@@ -109,4 +112,136 @@ export async function deleteWorkspace(workspaceId: string, userId: string) {
   } catch {
     throw notFound("Workspace");
   }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Workspace membership                                              */
+/* ------------------------------------------------------------------ */
+
+export async function listMembers(workspaceId: string) {
+  return prisma.workspaceMember.findMany({
+    where: { workspaceId },
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+export async function addMember(
+  workspaceId: string,
+  requesterId: string,
+  input: AddMemberInput,
+) {
+  // Only owners may add members
+  const requester = await prisma.workspaceMember.findUnique({
+    where: { userId_workspaceId: { userId: requesterId, workspaceId } },
+    select: { role: true },
+  });
+
+  if (!requester || requester.role !== "owner") {
+    throw forbidden("Only workspace owners can add members");
+  }
+
+  // Resolve target user by email
+  const targetUser = await prisma.user.findUnique({
+    where: { email: input.email },
+    select: { id: true },
+  });
+
+  if (!targetUser) {
+    throw notFound("User");
+  }
+
+  // Check for existing membership
+  const existing = await prisma.workspaceMember.findUnique({
+    where: {
+      userId_workspaceId: { userId: targetUser.id, workspaceId },
+    },
+    select: { id: true },
+  });
+
+  if (existing) {
+    throw new AppError(
+      409,
+      "User is already a member of this workspace",
+      ErrorCodes.CONFLICT,
+    );
+  }
+
+  const member = await prisma.workspaceMember.create({
+    data: {
+      userId: targetUser.id,
+      workspaceId,
+      role: input.role,
+    },
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return member;
+}
+
+export async function removeMember(
+  workspaceId: string,
+  requesterId: string,
+  memberId: string,
+) {
+  const requester = await prisma.workspaceMember.findUnique({
+    where: { userId_workspaceId: { userId: requesterId, workspaceId } },
+    select: { id: true, role: true },
+  });
+
+  if (!requester) {
+    throw forbidden("You are not a member of this workspace");
+  }
+
+  const target = await prisma.workspaceMember.findUnique({
+    where: { id: memberId, workspaceId },
+    select: { id: true, userId: true, role: true },
+  });
+
+  if (!target) {
+    throw notFound("Member");
+  }
+
+  const isSelf = target.userId === requesterId;
+
+  if (!isSelf && requester.role !== "owner") {
+    throw forbidden("Only workspace owners can remove other members");
+  }
+
+  // Prevent removing the last owner
+  if (target.role === "owner") {
+    const ownerCount = await prisma.workspaceMember.count({
+      where: { workspaceId, role: "owner" },
+    });
+
+    if (ownerCount <= 1) {
+      throw forbidden("Cannot remove the last owner of the workspace");
+    }
+  }
+
+  await prisma.workspaceMember.delete({ where: { id: memberId } });
 }

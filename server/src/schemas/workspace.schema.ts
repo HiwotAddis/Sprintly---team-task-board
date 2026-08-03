@@ -69,6 +69,17 @@ export const updateTaskSchema = z.object({
   columnId: cuidSchema.optional(),
 });
 
+export const workspaceRoleSchema = z.enum(["owner", "member"]);
+
+export const addMemberSchema = z.object({
+  email: z.string().trim().email("Valid email is required"),
+  role: workspaceRoleSchema.optional().default("member"),
+});
+
+export const removeMemberParamSchema = workspaceIdParamSchema.extend({
+  memberId: cuidSchema,
+});
+
 export type CreateWorkspaceInput = z.infer<typeof createWorkspaceSchema>;
 export type UpdateWorkspaceInput = z.infer<typeof updateWorkspaceSchema>;
 export type CreateBoardInput = z.infer<typeof createBoardSchema>;
@@ -77,3 +88,4 @@ export type CreateColumnInput = z.infer<typeof createColumnSchema>;
 export type UpdateColumnInput = z.infer<typeof updateColumnSchema>;
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
+export type AddMemberInput = z.infer<typeof addMemberSchema>;
