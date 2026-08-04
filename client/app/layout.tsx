@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "./context/AuthContext";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Sprintly",
-  description: "Real-time team task board",
+  title: "Sprintly — Team Task Board",
+  description: "Real-time, responsive team task board built with Next.js and Socket.io",
 };
 
 export default function RootLayout({
@@ -13,7 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${inter.className} bg-slate-950 text-slate-100 min-h-screen antialiased`}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
